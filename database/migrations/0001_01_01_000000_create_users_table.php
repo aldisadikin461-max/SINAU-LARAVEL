@@ -6,16 +6,38 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['admin', 'guru', 'siswa'])->default('siswa')->after('email');
-            $table->string('phone')->nullable()->after('role')->comment('Nomor WA siswa/guru');
-            $table->string('jurusan')->nullable()->after('phone');
-            $table->string('kelas')->nullable()->after('jurusan');
-            $table->unsignedBigInteger('total_poin')->default(0)->after('kelas');
-            $table->unsignedTinyInteger('level')->default(1)->after('total_poin');
-        });
-    }
+{
+    Schema::create('users', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->string('email')->unique();
+        $table->timestamp('email_verified_at')->nullable();
+        $table->string('password');
+        $table->string('role')->default('siswa');
+        $table->string('jurusan')->nullable();
+        $table->string('kelas')->nullable();
+        $table->string('phone')->nullable();
+        $table->unsignedBigInteger('total_poin')->default(0);
+        $table->unsignedInteger('level')->default(1);
+        $table->rememberToken();
+        $table->timestamps();
+    });
+
+    Schema::create('password_reset_tokens', function (Blueprint $table) {
+        $table->string('email')->primary();
+        $table->string('token');
+        $table->timestamp('created_at')->nullable();
+    });
+
+    Schema::create('sessions', function (Blueprint $table) {
+        $table->string('id')->primary();
+        $table->foreignId('user_id')->nullable()->index();
+        $table->string('ip_address', 45)->nullable();
+        $table->text('user_agent')->nullable();
+        $table->longText('payload');
+        $table->integer('last_activity')->index();
+    });
+}
 
     public function down(): void
     {

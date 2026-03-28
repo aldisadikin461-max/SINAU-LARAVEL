@@ -1,0 +1,241 @@
+/* ══════════════════════════════════════════════
+   Sinau — sinau.css v3
+   Light Theme Glassmorphism Friendly
+   Font: Nunito + Fredoka One
+   ══════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
+
+:root {
+  --primary:   #0ea5e9;
+  --primary-d: #0284c7;
+  --orange:    #f97316;
+  --green:     #22c55e;
+  --violet:    #8b5cf6;
+  --bg:        #f0f9ff;
+  --surface:   #ffffff;
+  --border:    rgba(14,165,233,0.12);
+  --text:      #0f172a;
+  --muted:     #94a3b8;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(160deg, #e8f4fd 0%, #f0f9ff 50%, #fef9ee 100%);
+  color: var(--text);
+}
+
+/* ── Glass Card ─────────────────────────────── */
+.glass-card {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(14,165,233,0.12);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px rgba(14,165,233,0.08);
+}
+
+/* ── Sidebar Admin/Guru ─────────────────────── */
+.sinau-sidebar {
+  background: linear-gradient(180deg, #0c4a7a 0%, #083358 100%);
+  min-height: 100vh;
+  width: 260px;
+  border-right: none;
+}
+
+.sinau-sidebar .nav-link {
+  color: rgba(255,255,255,0.6);
+  border-radius: 0.875rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  font-family: 'Nunito', sans-serif;
+}
+.sinau-sidebar .nav-link:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+.sinau-sidebar .nav-link.active {
+  background: rgba(14,165,233,0.25);
+  color: #fff;
+  border: 1px solid rgba(14,165,233,0.3);
+}
+
+/* ── Streak Badge ───────────────────────────── */
+.streak-badge {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: white;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ── Badge Pill ─────────────────────────────── */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(14,165,233,0.1);
+  border: 1px solid rgba(14,165,233,0.2);
+  color: #0284c7;
+  border-radius: 999px;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ── Status ─────────────────────────────────── */
+.status-buka    { background:#dcfce7; color:#16a34a; border:1px solid #bbf7d0; border-radius:999px; padding:0.15rem 0.65rem; font-size:0.78rem; font-weight:700; }
+.status-tutup   { background:#fee2e2; color:#dc2626; border:1px solid #fecaca; border-radius:999px; padding:0.15rem 0.65rem; font-size:0.78rem; font-weight:700; }
+.status-pending { background:#fef9c3; color:#ca8a04; border:1px solid #fde68a; border-radius:999px; padding:0.15rem 0.65rem; font-size:0.78rem; font-weight:700; }
+.status-done    { background:#dcfce7; color:#16a34a; border:1px solid #bbf7d0; border-radius:999px; padding:0.15rem 0.65rem; font-size:0.78rem; font-weight:700; }
+
+/* ── Ebook Card ─────────────────────────────── */
+.ebook-card {
+  background: white;
+  border: 1px solid rgba(14,165,233,0.1);
+  border-radius: 1.25rem;
+  transition: transform 0.25s, box-shadow 0.25s;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(14,165,233,0.07);
+}
+.ebook-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(14,165,233,0.15);
+}
+
+/* ── Kinners Mascot ─────────────────────────── */
+.kinners-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+.kinners-wrap svg {
+  filter: drop-shadow(0 8px 24px rgba(14,165,233,0.2));
+  animation: kinners-float 3.5s ease-in-out infinite;
+}
+@keyframes kinners-float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+.kinners-bubble {
+  background: white;
+  border: 1.5px solid rgba(14,165,233,0.2);
+  border-radius: 1rem 1rem 1rem 0;
+  padding: 0.6rem 1rem;
+  color: #0284c7;
+  font-size: 0.875rem;
+  font-style: italic;
+  font-weight: 700;
+  max-width: 240px;
+  text-align: center;
+  line-height: 1.5;
+  box-shadow: 0 4px 16px rgba(14,165,233,0.1);
+}
+
+/* ── Soal Options ───────────────────────────── */
+.opsi-btn {
+  background: white;
+  border: 2px solid rgba(14,165,233,0.15);
+  border-radius: 1rem;
+  padding: 0.9rem 1.1rem;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  width: 100%;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.opsi-btn:hover          { background: #f0f9ff; border-color: #0ea5e9; }
+.opsi-btn.correct        { background: #dcfce7; border-color: #22c55e; color: #16a34a; }
+.opsi-btn.wrong          { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
+.opsi-btn:disabled       { cursor: not-allowed; }
+
+/* ── Pomodoro Ring ──────────────────────────── */
+.pomodoro-ring { width: 220px; height: 220px; }
+.pomodoro-ring circle { fill: none; stroke-width: 14; stroke-linecap: round; }
+.pomodoro-ring .track  { stroke: #e0f2fe; }
+.pomodoro-ring .timer  {
+  stroke: #0ea5e9;
+  transition: stroke-dashoffset 1s linear;
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+/* ── Leaderboard ────────────────────────────── */
+.leaderboard-row:nth-child(1) .rank { color: #f59e0b; font-size: 1.3rem; }
+.leaderboard-row:nth-child(2) .rank { color: #94a3b8; font-size: 1.15rem; }
+.leaderboard-row:nth-child(3) .rank { color: #cd7c2f; font-size: 1.15rem; }
+
+/* ── Scrollbar ──────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: #f0f9ff; }
+::-webkit-scrollbar-thumb { background: #bae6fd; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #7dd3fc; }
+
+/* ── Input & Select ─────────────────────────── */
+.sinau-input {
+  background: white;
+  border: 2px solid rgba(14,165,233,0.15);
+  border-radius: 0.875rem;
+  padding: 0.65rem 1rem;
+  color: #1e293b;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: border-color 0.2s;
+  outline: none;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.sinau-input:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn-sinau-primary {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.65rem 1.5rem; border-radius: 999px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: white; font-weight: 800; font-size: 0.9rem;
+  font-family: 'Nunito', sans-serif;
+  border: none; cursor: pointer; text-decoration: none;
+  box-shadow: 0 4px 16px rgba(14,165,233,0.3);
+  transition: all 0.2s;
+}
+.btn-sinau-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,165,233,0.4); }
+
+.btn-sinau-ghost {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.65rem 1.5rem; border-radius: 999px;
+  background: white; border: 2px solid rgba(14,165,233,0.2);
+  color: #0284c7; font-weight: 700; font-size: 0.9rem;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer; text-decoration: none; transition: all 0.2s;
+}
+.btn-sinau-ghost:hover { border-color: #0ea5e9; background: #f0f9ff; }
+
+.btn-sinau-danger {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 1rem; border-radius: 999px;
+  background: #fee2e2; border: 1px solid #fecaca;
+  color: #dc2626; font-weight: 700; font-size: 0.85rem;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer; text-decoration: none; transition: all 0.2s;
+}
+.btn-sinau-danger:hover { background: #fecaca; }
