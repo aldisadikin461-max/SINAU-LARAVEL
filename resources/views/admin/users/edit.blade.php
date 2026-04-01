@@ -1,60 +1,80 @@
 @extends('layouts.admin')
 @section('title','Edit User')
 @section('content')
-
 <style>
-.page-title  { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.8rem; color:#0d1f35; margin-bottom:1.5rem; letter-spacing:-0.5px; }
-.back-link   { color:#1a8cff; font-size:.88rem; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:.3rem; margin-bottom:1rem; font-family:'Nunito',sans-serif; }
-.back-link:hover { text-decoration:underline; }
-.form-card   { background:#fff; border:2px solid #d0e4f7; border-radius:1.5rem; padding:2rem; max-width:520px; box-shadow:0 4px 0 #d0e4f7; }
-.form-group  { margin-bottom:1rem; }
-.form-label  { display:block; font-family:'Nunito',sans-serif; font-size:.82rem; font-weight:800; color:#3d5a7a; margin-bottom:.4rem; }
-.finput      { width:100%; background:#f4f8ff; border:2px solid #d0e4f7; border-radius:14px; padding:.65rem 1rem; font-size:.9rem; font-weight:600; color:#0d1f35; outline:none; font-family:'Nunito Sans',sans-serif; transition:all .18s; }
-.finput:focus{ border-color:#1a8cff; background:#fff; box-shadow:0 0 0 4px rgba(26,140,255,.1); }
-.ferr        { color:#ff4757; font-size:.78rem; font-weight:700; margin-top:.3rem; font-family:'Nunito',sans-serif; }
-.fbtn        { padding:.75rem 2rem; border-radius:14px; background:#1a8cff; color:#fff; font-size:.95rem; font-weight:900; border:none; cursor:pointer; font-family:'Nunito',sans-serif; box-shadow:0 5px 0 #005bb8; transition:all .18s; margin-top:.5rem; }
-.fbtn:hover  { transform:translateY(-2px); box-shadow:0 7px 0 #005bb8; }
-.fbtn:active { transform:translateY(3px); box-shadow:0 2px 0 #005bb8; }
+.back{color:#0ea5e9;font-size:.88rem;font-weight:800;text-decoration:none;display:inline-block;margin-bottom:1rem;}
+.page-title{font-family:'Fredoka One',sans-serif;font-size:1.8rem;color:#0f172a;margin-bottom:1.25rem;}
+.fcard{background:#fff;border:1.5px solid rgba(14,165,233,.1);border-radius:1.25rem;padding:2rem;max-width:560px;box-shadow:0 4px 18px rgba(14,165,233,.07);}
+.sec{font-family:'Fredoka One',sans-serif;font-size:1rem;color:#0ea5e9;margin-bottom:.75rem;margin-top:.5rem;}
+label{display:block;font-size:.82rem;font-weight:800;color:#64748b;margin-bottom:.35rem;}
+.fi{width:100%;background:#f8fafc;border:2px solid rgba(14,165,233,.12);border-radius:.875rem;padding:.6rem 1rem;font-size:.9rem;font-weight:700;color:#1e293b;outline:none;font-family:'Nunito',sans-serif;margin-bottom:.85rem;transition:border-color .2s;}
+.fi:focus{border-color:#0ea5e9;background:#fff;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:600px){.g2{grid-template-columns:1fr;}}
+.err{color:#ef4444;font-size:.78rem;font-weight:700;margin-top:-.6rem;margin-bottom:.6rem;}
+.sbtn{padding:.7rem 2rem;border-radius:999px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-size:.95rem;font-weight:800;border:none;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 4px 14px rgba(14,165,233,.3);}
+.hint{font-size:.75rem;color:#94a3b8;font-weight:600;margin-top:-.6rem;margin-bottom:.7rem;}
+.user-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f0f9ff;border:1.5px solid rgba(14,165,233,.2);border-radius:999px;padding:.35rem 1rem;font-size:.85rem;font-weight:800;color:#0284c7;margin-bottom:1.25rem;}
 </style>
 
-<a href="{{ route('admin.users') }}" class="back-link">← Kembali</a>
-<div class="page-title">✏️ Edit User</div>
+<a href="{{ route('admin.users.index') }}" class="back">← Kembali ke Kelola User</a>
+<div class="page-title">Edit User ✏️</div>
 
-<div class="form-card">
+<div class="fcard">
+  <div class="user-badge">
+    👤 {{ $user->name }} — <span style="text-transform:capitalize;">{{ $user->role }}</span>
+  </div>
+
   <form method="POST" action="{{ route('admin.users.update', $user) }}">
-    @csrf
-    @method('PUT')
+    @csrf @method('PUT')
 
-    @foreach([
-      ['name',    'Nama Lengkap',   'text',  $user->name],
-      ['email',   'Email',          'email', $user->email],
-      ['phone',   'No. WhatsApp',   'text',  $user->phone],
-      ['jurusan', 'Jurusan',        'text',  $user->jurusan],
-      ['kelas',   'Kelas',          'text',  $user->kelas],
-    ] as [$f, $l, $t, $v])
-      <div class="form-group">
-        <label class="form-label">{{ $l }}</label>
-        <input name="{{ $f }}" type="{{ $t }}" value="{{ old($f, $v) }}" class="finput {{ $errors->has($f) ? 'border-red-400' : '' }}">
-        @error($f)
-          <p class="ferr">{{ $message }}</p>
-        @enderror
+    <div class="sec">👤 Data Akun</div>
+    <label>Nama Lengkap</label>
+    <input name="name" value="{{ old('name', $user->name) }}" class="fi">
+    @error('name')<p class="err">{{ $message }}</p>@enderror
+
+    <label>Email</label>
+    <input name="email" type="email" value="{{ old('email', $user->email) }}" class="fi">
+    @error('email')<p class="err">{{ $message }}</p>@enderror
+
+    <label>Role</label>
+    <select name="role" class="fi">
+      @foreach(['admin'=>'Admin','guru'=>'Guru','siswa'=>'Siswa'] as $v=>$l)
+        <option value="{{ $v }}" {{ old('role',$user->role)===$v?'selected':'' }}>{{ $l }}</option>
+      @endforeach
+    </select>
+    @error('role')<p class="err">{{ $message }}</p>@enderror
+
+    <div class="sec">📋 Informasi Tambahan</div>
+    <div class="g2">
+      <div>
+        <label>Jurusan</label>
+        <input name="jurusan" value="{{ old('jurusan', $user->jurusan) }}" placeholder="RPL / TKJ / MM" class="fi">
       </div>
-    @endforeach
-
-    <div class="form-group">
-      <label class="form-label">Role</label>
-      <select name="role" class="finput">
-        @foreach(['admin','guru','siswa'] as $r)
-          <option value="{{ $r }}" {{ $user->role === $r ? 'selected' : '' }}>{{ ucfirst($r) }}</option>
-        @endforeach
-      </select>
-      @error('role')
-        <p class="ferr">{{ $message }}</p>
-      @enderror
+      <div>
+        <label>Kelas</label>
+        <input name="kelas" value="{{ old('kelas', $user->kelas) }}" placeholder="X / XI / XII" class="fi">
+      </div>
     </div>
 
-    <button type="submit" class="fbtn">💾 Simpan Perubahan</button>
+    <label>No. WhatsApp</label>
+    <input name="phone" value="{{ old('phone', $user->phone) }}" placeholder="08xxxxxxxxxx" class="fi">
+
+    <div class="sec">🔒 Ganti Password</div>
+    <div class="g2">
+      <div>
+        <label>Password Baru</label>
+        <input name="password" type="password" placeholder="Kosongkan jika tidak diganti" class="fi">
+        @error('password')<p class="err">{{ $message }}</p>@enderror
+      </div>
+      <div>
+        <label>Konfirmasi Password</label>
+        <input name="password_confirmation" type="password" placeholder="Ulangi password baru" class="fi">
+      </div>
+    </div>
+    <p class="hint">Kosongkan kedua field di atas jika tidak ingin mengubah password.</p>
+
+    <button type="submit" class="sbtn">Simpan Perubahan ✅</button>
   </form>
 </div>
-
 @endsection

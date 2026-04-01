@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="{{ asset('css/sinau.css') }}">
   <style>
     body{background:linear-gradient(160deg,#e8f4fd 0%,#f0f9ff 55%,#fef9ee 100%);min-height:100vh;}
-    .snav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.88);backdrop-filter:blur(20px);border-bottom:1.5px solid rgba(14,165,233,0.1);padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 16px rgba(14,165,233,0.07);}
+    .snav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-bottom:2.5px solid #0ea5e9;padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(14,165,233,0.12);}
     .snav-brand{display:flex;align-items:center;gap:.4rem;font-family:'Fredoka One',sans-serif;font-size:1.4rem;color:#0ea5e9;text-decoration:none;}
     .snav-brand .cat{animation:wiggle 3s ease-in-out infinite;font-size:1.6rem;}
     @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
@@ -32,7 +32,16 @@
 <nav class="snav">
   <a href="{{ route('siswa.dashboard') }}" class="snav-brand"><span class="cat">🐱</span> Sinau</a>
   <div class="snav-links">
-    @foreach([['siswa.dashboard','Beranda'],['siswa.latihan','Latihan Soal'],['siswa.leaderboard','Leaderboard'],['siswa.beasiswa','Beasiswa'],['siswa.forum','Forum'],['siswa.riwayat','Riwayat'],['siswa.pomodoro','Pomodoro']] as [$r,$l])
+    @foreach([
+        ['siswa.dashboard','Beranda'],
+        ['siswa.latihan','Latihan Soal'],
+        ['siswa.leaderboard','Leaderboard'],
+        ['siswa.beasiswa','Beasiswa'],
+        ['siswa.forum','Forum'],
+        ['siswa.riwayat','Riwayat'],
+        ['siswa.pomodoro','Pomodoro'],
+        ['siswa.rasionalisasi.index','Rasionalisasi']   // <-- menu baru
+    ] as [$r,$l])
       <a href="{{ route($r) }}" class="{{ request()->routeIs($r)?'on':'' }}">{{ $l }}</a>
     @endforeach
   </div>

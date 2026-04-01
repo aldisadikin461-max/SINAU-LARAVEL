@@ -37,7 +37,7 @@ class EbookController extends Controller
             'judul'       => 'required|string|max:255',
             'penulis'     => 'required|string|max:255',
             'jurusan'     => 'nullable|string|max:100',
-            'file'        => 'required|mimes:pdf|max:20480',
+            'file'        => 'required|mimes:pdf|max:100680',
             'cover'       => 'nullable|image|max:2048',
         ]);
 

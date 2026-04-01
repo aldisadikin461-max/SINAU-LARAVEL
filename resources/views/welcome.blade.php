@@ -19,8 +19,9 @@
     .navbar{
       position:fixed;top:0;width:100%;z-index:100;
       padding:1rem 3rem;display:flex;align-items:center;justify-content:space-between;
-      background:rgba(255,255,255,0.8);backdrop-filter:blur(20px);
-      border-bottom:1px solid rgba(14,165,233,0.1);
+      background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);
+      border-bottom:2.5px solid #0ea5e9;
+      box-shadow:0 4px 24px rgba(14,165,233,0.12);
     }
     .brand{display:flex;align-items:center;gap:0.5rem;font-family:'Fredoka One',sans-serif;font-size:1.7rem;color:#0ea5e9;text-decoration:none;}
     .brand-cat{animation:wiggle 3s ease-in-out infinite;font-size:1.9rem;}

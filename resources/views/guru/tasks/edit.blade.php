@@ -1,54 +1,40 @@
 @extends('layouts.guru')
 @section('title','Edit Tugas')
 @section('content')
-
-<div class="mb-6">
-  <a href="{{ route('guru.tasks.index') }}" class="text-slate-400 hover:text-white text-sm">← Kembali</a>
-  <h1 class="text-2xl font-bold mt-2">Edit Tugas</h1>
-</div>
-
-<div class="glass-card p-6 max-w-xl">
-  <form method="POST" action="{{ route('guru.tasks.update', $task) }}">
+<style>
+.back{color:#0ea5e9;font-size:.88rem;font-weight:800;text-decoration:none;display:inline-block;margin-bottom:1rem;}
+.page-title{font-family:'Fredoka One',sans-serif;font-size:1.8rem;color:#0f172a;margin-bottom:1.25rem;}
+.fcard{background:#fff;border:1.5px solid rgba(14,165,233,.1);border-radius:1.25rem;padding:2rem;max-width:580px;box-shadow:0 4px 18px rgba(14,165,233,.07);}
+label{display:block;font-size:.82rem;font-weight:800;color:#64748b;margin-bottom:.35rem;}
+.fi{width:100%;background:#f8fafc;border:2px solid rgba(14,165,233,.12);border-radius:.875rem;padding:.6rem 1rem;font-size:.9rem;font-weight:700;color:#1e293b;outline:none;font-family:'Nunito',sans-serif;margin-bottom:.85rem;transition:border-color .2s;}
+.fi:focus{border-color:#0ea5e9;background:#fff;}
+textarea.fi{resize:none;border-radius:.875rem;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:600px){.g2{grid-template-columns:1fr;}}
+.sbtn{padding:.7rem 2rem;border-radius:999px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-size:.95rem;font-weight:800;border:none;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 4px 14px rgba(14,165,233,.3);}
+</style>
+<a href="{{ route('guru.tasks.index') }}" class="back">← Kembali ke Daftar Tugas</a>
+<div class="page-title">Edit Tugas ✏️</div>
+<div class="fcard">
+  <form method="POST" action="{{ route('guru.tasks.update',$task) }}">
     @csrf @method('PUT')
-
-    <div class="mb-4">
-      <label class="block text-sm text-slate-400 mb-1">Judul Tugas</label>
-      <input name="judul" value="{{ old('judul', $task->judul) }}"
-        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-      @error('judul')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
-    </div>
-
-    <div class="grid grid-cols-2 gap-4 mb-4">
+    <label>Judul Tugas</label>
+    <input name="judul" value="{{ old('judul',$task->judul) }}" class="fi">
+    <div class="g2">
       <div>
-        <label class="block text-sm text-slate-400 mb-1">Jurusan</label>
-        <input name="jurusan" value="{{ old('jurusan', $task->jurusan) }}"
-          class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+        <label>Jurusan</label>
+        <input name="jurusan" value="{{ old('jurusan',$task->jurusan) }}" placeholder="Kosong = semua" class="fi">
       </div>
       <div>
-        <label class="block text-sm text-slate-400 mb-1">Kelas</label>
-        <input name="kelas" value="{{ old('kelas', $task->kelas) }}"
-          class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+        <label>Kelas</label>
+        <input name="kelas" value="{{ old('kelas',$task->kelas) }}" placeholder="Kosong = semua" class="fi">
       </div>
     </div>
-
-    <div class="mb-4">
-      <label class="block text-sm text-slate-400 mb-1">Deadline</label>
-      <input name="deadline" type="datetime-local"
-             value="{{ old('deadline', $task->deadline->format('Y-m-d\TH:i')) }}"
-        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-      @error('deadline')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
-    </div>
-
-    <div class="mb-6">
-      <label class="block text-sm text-slate-400 mb-1">Deskripsi</label>
-      <textarea name="deskripsi" rows="4"
-        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 resize-none">{{ old('deskripsi', $task->deskripsi) }}</textarea>
-    </div>
-
-    <button class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold">
-      Simpan Perubahan
-    </button>
+    <label>Deadline</label>
+    <input name="deadline" type="datetime-local" value="{{ old('deadline',$task->deadline->format('Y-m-d\TH:i')) }}" class="fi">
+    <label>Deskripsi</label>
+    <textarea name="deskripsi" rows="4" class="fi">{{ old('deskripsi',$task->deskripsi) }}</textarea>
+    <button type="submit" class="sbtn">Simpan Perubahan ✅</button>
   </form>
 </div>
-
 @endsection

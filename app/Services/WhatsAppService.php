@@ -3,53 +3,65 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 class WhatsAppService
 {
-    const TEMPLATES = [
-        'streak'  => "Hei {nama}! 🔥 Streak kamu di Sinau sudah {streak} hari.\nJangan sampai putus ya! Yuk jawab 1 soal hari ini:\nhttp://sinau.test/siswa/dashboard — Kinners nunggu kamu! 🐱",
-        'tugas'   => "Hei {nama}! 📚 Ada tugas baru di Sinau:\n{judul} — Deadline: {deadline}.\nCek sekarang: http://sinau.test/siswa/dashboard",
-        'badge'   => "Hei {nama}! 🏅 Selamat! Kamu baru saja meraih badge\n'{badge}' di Sinau! Pertahankan streak-mu ya Smeconer!\nLihat koleksi badge: http://sinau.test/siswa/dashboard",
-        'bebas'   => "{pesan}",
+    private array $templates = [
+        'streak' => "Hai {nama}! 🔥\n\nStreak belajarmu di Sinau hampir putus nih. Yuk belajar sebentar hari ini biar streak-mu tetap terjaga!\n\nSemangat, Smeconer! 💪\n\n— Sinau SMKN 1 Purwokerto",
+        'badge'  => "Hai {nama}! 🏅\n\nSelamat! Kamu baru saja meraih badge baru di Sinau! Terus pertahankan semangat belajarmu.\n\nBangga sama kamu, Smeconer! 🎉\n\n— Sinau SMKN 1 Purwokerto",
+        'motivasi' => "Hai {nama}! 💪\n\nJangan lupa belajar hari ini ya! Setiap langkah kecil membawamu lebih dekat ke impianmu.\n\nAyo, Smeconer!\n\n— Sinau SMKN 1 Purwokerto",
+        'bebas'  => '{pesan}',
     ];
 
     public function buildMessage(string $template, array $data): string
     {
-        $text = self::TEMPLATES[$template] ?? $data['pesan'] ?? '';
+        $msg = $this->templates[$template] ?? $data['pesan'] ?? '';
+        return str_replace(
+            ['{nama}', '{pesan}'],
+            [$data['nama'] ?? '', $data['pesan'] ?? ''],
+            $msg
+        );
+    }
 
-        foreach ($data as $key => $value) {
-            $text = str_replace('{' . $key . '}', $value, $text);
+    public function formatPhone(string $phone): string
+    {
+        // Hapus semua karakter non-angka
+        $phone = preg_replace('/\D/', '', $phone);
+
+        // Ganti 0 di depan dengan 62
+        if (str_starts_with($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
         }
 
-        return $text;
+        // Tambah 62 kalau belum ada
+        if (!str_starts_with($phone, '62')) {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 
     public function getWaLink(string $phone, string $message): string
     {
-        $phone   = preg_replace('/\D/', '', $phone);
-        $phone   = ltrim($phone, '0');
-        $phone   = '62' . $phone;
-
-        return 'https://wa.me/' . $phone . '?text=' . urlencode($message);
+        $phone = $this->formatPhone($phone);
+        return 'https://wa.me/' . $phone . '?text=' . rawurlencode($message);
     }
 
-    public function blastLink(array $users, string $template, array $extraData = []): array
+    public function blastLink($users, string $template, array $extra = []): array
     {
-        $links = [];
+        $users = collect($users); // pastikan selalu Collection
+        return $users->map(function (User $user) use ($template, $extra) {
+            $data = array_merge(['nama' => $user->name], $extra);
+            $msg  = $this->buildMessage($template, $data);
 
-        foreach ($users as $user) {
-            $data = array_merge($extraData, [
-                'nama'   => $user->name,
-                'streak' => $user->streak?->streak_count ?? 0,
-            ]);
-
-            $message = $this->buildMessage($template, $data);
-            $links[] = [
-                'user' => $user,
-                'link' => $this->getWaLink($user->phone ?? '', $message),
+            return [
+                'name'  => $user->name,
+                'phone' => $user->phone ?? null,
+                'waUrl' => $user->phone
+                    ? $this->getWaLink($user->phone, $msg)
+                    : null,
             ];
-        }
-
-        return $links;
+        })->values()->toArray();
     }
 }

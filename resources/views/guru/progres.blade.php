@@ -1,56 +1,48 @@
 @extends('layouts.guru')
 @section('title','Progres Siswa')
 @section('content')
-
-<h1 class="text-2xl font-bold mb-6">📈 Progres Belajar Siswa</h1>
-
-<div class="glass-card overflow-x-auto">
-  <table class="w-full text-sm">
-    <thead>
-      <tr class="text-slate-400 border-b border-slate-700 text-left">
-        <th class="px-4 py-3">Nama</th>
-        <th class="px-4 py-3">Jurusan</th>
-        <th class="px-4 py-3">Kelas</th>
-        <th class="px-4 py-3">Streak</th>
-        <th class="px-4 py-3">Total Soal Dijawab</th>
-        <th class="px-4 py-3">Benar</th>
-        <th class="px-4 py-3">Akurasi</th>
-      </tr>
-    </thead>
+<style>
+.page-title{font-family:'Fredoka One',sans-serif;font-size:1.8rem;color:#0f172a;margin-bottom:1.25rem;}
+.card{background:#fff;border:1.5px solid rgba(14,165,233,.1);border-radius:1.25rem;overflow:hidden;box-shadow:0 4px 18px rgba(14,165,233,.07);}
+table{width:100%;border-collapse:collapse;font-family:'Nunito',sans-serif;}
+thead tr{background:#f0f9ff;border-bottom:2px solid rgba(14,165,233,.1);}
+thead th{padding:.8rem 1rem;text-align:left;font-size:.78rem;font-weight:800;color:#0284c7;text-transform:uppercase;letter-spacing:.04em;}
+tbody tr{border-bottom:1px solid rgba(14,165,233,.06);transition:background .15s;}
+tbody tr:hover{background:#f0f9ff;}
+tbody td{padding:.85rem 1rem;font-size:.86rem;font-weight:700;}
+.sp{background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;border-radius:999px;padding:.2rem .75rem;font-size:.78rem;font-weight:800;}
+.bw{display:flex;align-items:center;gap:.5rem;}
+.bt{width:80px;height:8px;background:#e0f2fe;border-radius:999px;overflow:hidden;}
+.bf{height:100%;border-radius:999px;}
+.bg{background:#22c55e;}.bm{background:#f59e0b;}.bb{background:#ef4444;}
+.pct{font-size:.78rem;color:#64748b;}
+</style>
+<div class="page-title">📈 Progres Belajar Siswa</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Nama</th><th>Jurusan</th><th>Kelas</th><th>Streak</th><th>Total Soal</th><th>Benar</th><th>Akurasi</th></tr></thead>
     <tbody>
       @forelse($siswa as $s)
         @php
-          $total  = $s->userAnswers->count();
-          $benar  = $s->userAnswers->where('is_correct', true)->count();
-          $akurasi = $total > 0 ? round($benar / $total * 100) : 0;
+          $total=$s->userAnswers->count();
+          $benar=$s->userAnswers->where('is_correct',true)->count();
+          $pct=$total>0?round($benar/$total*100):0;
+          $cls=$pct>=70?'bg':($pct>=40?'bm':'bb');
         @endphp
-        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
-          <td class="px-4 py-3 font-medium">{{ $s->name }}</td>
-          <td class="px-4 py-3 text-slate-400">{{ $s->jurusan ?? '-' }}</td>
-          <td class="px-4 py-3 text-slate-400">{{ $s->kelas ?? '-' }}</td>
-          <td class="px-4 py-3">
-            <span class="streak-badge text-xs">🔥 {{ $s->streak?->streak_count ?? 0 }}</span>
-          </td>
-          <td class="px-4 py-3 text-center">{{ $total }}</td>
-          <td class="px-4 py-3 text-center text-green-400 font-semibold">{{ $benar }}</td>
-          <td class="px-4 py-3">
-            <div class="flex items-center gap-2">
-              <div class="flex-1 bg-slate-800 rounded-full h-2 w-20">
-                <div class="h-2 rounded-full {{ $akurasi >= 70 ? 'bg-green-500' : ($akurasi >= 40 ? 'bg-yellow-500' : 'bg-red-500') }}"
-                     style="width:{{ $akurasi }}%"></div>
-              </div>
-              <span class="text-xs text-slate-400">{{ $akurasi }}%</span>
-            </div>
-          </td>
+        <tr>
+          <td style="font-weight:800;">{{ $s->name }}</td>
+          <td style="color:#94a3b8;">{{ $s->jurusan??'-' }}</td>
+          <td style="color:#94a3b8;">{{ $s->kelas??'-' }}</td>
+          <td><span class="sp">🔥 {{ $s->streak?->streak_count??0 }}</span></td>
+          <td style="text-align:center;">{{ $total }}</td>
+          <td style="text-align:center;color:#16a34a;">{{ $benar }}</td>
+          <td><div class="bw"><div class="bt"><div class="bf {{ $cls }}" style="width:{{ $pct }}%"></div></div><span class="pct">{{ $pct }}%</span></div></td>
         </tr>
       @empty
-        <tr>
-          <td colspan="7" class="text-center py-8 text-slate-500">Belum ada data siswa.</td>
-        </tr>
+        <tr><td colspan="7" style="text-align:center;padding:2rem;color:#94a3b8;font-weight:700;">Belum ada data siswa.</td></tr>
       @endforelse
     </tbody>
   </table>
-  <div class="p-4">{{ $siswa->links() }}</div>
+  <div style="padding:1rem;">{{ $siswa->links() }}</div>
 </div>
-
 @endsection
