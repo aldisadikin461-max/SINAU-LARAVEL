@@ -18,6 +18,7 @@
 </style>
 <div class="page-title">📋 Riwayat Jawaban</div>
 <div class="card">
+  <div style="overflow-x:auto;">
   <table>
     <thead><tr><th>Pertanyaan</th><th>Kategori</th><th>Jawaban</th><th>Hasil</th><th>Waktu</th></tr></thead>
     <tbody>
@@ -34,6 +35,7 @@
       @endforelse
     </tbody>
   </table>
+  </div>
   <div style="padding:1rem;">{{ $answers->links() }}</div>
 </div>
 @endsection

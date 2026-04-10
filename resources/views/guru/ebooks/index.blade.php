@@ -35,6 +35,7 @@ tbody td{padding:.8rem 1rem;font-size:.86rem;font-weight:700;}
   <button type="submit" class="fbtn">Filter</button>
 </form>
 <div class="card">
+  <div style="overflow-x:auto;">
   <table>
     <thead><tr><th>Judul</th><th>Penulis</th><th>Kategori</th><th>Jurusan</th><th>Aksi</th></tr></thead>
     <tbody>
@@ -57,6 +58,7 @@ tbody td{padding:.8rem 1rem;font-size:.86rem;font-weight:700;}
       @endforelse
     </tbody>
   </table>
+  </div>
   <div style="padding:1rem;">{{ $ebooks->links() }}</div>
 </div>
 @endsection

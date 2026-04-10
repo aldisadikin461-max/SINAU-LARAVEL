@@ -5,6 +5,7 @@
 .page-title{font-family:'Fredoka One',sans-serif;font-size:1.8rem;color:#0f172a;margin-bottom:1.25rem;}
 .top-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem;}
 .btn-new{padding:.55rem 1.4rem;border-radius:999px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-size:.88rem;font-weight:800;text-decoration:none;box-shadow:0 4px 14px rgba(14,165,233,.3);}
+.btn-import{padding:.55rem 1.4rem;border-radius:999px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:.88rem;font-weight:800;text-decoration:none;box-shadow:0 4px 14px rgba(34,197,94,.3);}
 .card{background:#fff;border:1.5px solid rgba(14,165,233,.1);border-radius:1.25rem;overflow:hidden;box-shadow:0 4px 18px rgba(14,165,233,.07);}
 table{width:100%;border-collapse:collapse;font-family:'Nunito',sans-serif;}
 thead tr{background:#f0f9ff;border-bottom:2px solid rgba(14,165,233,.1);}
@@ -17,25 +18,25 @@ tbody td{padding:.85rem 1rem;font-size:.86rem;font-weight:700;}
 .btn-e{background:#e0f2fe;color:#0284c7;border-radius:999px;padding:.22rem .75rem;font-size:.76rem;font-weight:800;text-decoration:none;display:inline-block;}
 .btn-d{background:#fee2e2;color:#dc2626;border-radius:999px;padding:.22rem .75rem;font-size:.76rem;font-weight:800;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
 .salert{background:#dcfce7;border:1px solid #bbf7d0;color:#16a34a;border-radius:1rem;padding:.875rem 1.25rem;margin-bottom:1.25rem;font-weight:700;font-size:.9rem;}
+.info-banner{background:#f0fdf4;border:1.5px dashed #86efac;border-radius:1rem;padding:.75rem 1.25rem;margin-bottom:1.25rem;font-size:.84rem;font-weight:700;color:#15803d;}
 </style>
-
-@if(session('success'))<div class="salert">✅ {{ session('success') }}</div>@endif
-
+@if(session('success'))<div class="salert">{{ session('success') }}</div>@endif
 <div class="top-row">
-  <div class="page-title">📦 Paket Soal</div>
-  <a href="{{ route('guru.quiz.create') }}" class="btn-new">+ Buat Paket Baru</a>
+  <div class="page-title">Paket Soal</div>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+    <a href="{{ route('guru.quiz.import.form') }}" class="btn-import">Import Excel</a>
+    <a href="{{ route('guru.quiz.create') }}" class="btn-new">+ Buat Paket Baru</a>
+  </div>
 </div>
-
+<div class="info-banner">
+  Punya banyak soal? Gunakan fitur <strong>Import Excel</strong> untuk upload sekaligus!
+</div>
 <div class="card">
+  <div style="overflow-x:auto;">
   <table>
     <thead>
       <tr>
-        <th>Nama Paket</th>
-        <th>Kelas</th>
-        <th>Jumlah Soal</th>
-        <th>Status</th>
-        <th>Dibuat</th>
-        <th>Aksi</th>
+        <th>Nama Paket</th><th>Kelas</th><th>Jumlah Soal</th><th>Status</th><th>Dibuat</th><th>Aksi</th>
       </tr>
     </thead>
     <tbody>
@@ -48,12 +49,11 @@ tbody td{padding:.85rem 1rem;font-size:.86rem;font-weight:700;}
           <td style="color:#94a3b8;font-size:.8rem;">{{ $p->created_at->format('d M Y') }}</td>
           <td>
             <div style="display:flex;gap:.4rem;align-items:center;">
-              <a href="{{ route('guru.quiz.show', $p) }}" class="btn-e">📋 Detail</a>
-              <a href="{{ route('guru.quiz.edit', $p) }}" class="btn-e">✏️ Edit</a>
-              <form method="POST" action="{{ route('guru.quiz.destroy', $p) }}"
-                    onsubmit="return confirm('Hapus paket {{ $p->nama }}?')">
+              <a href="{{ route('guru.quiz.show', $p) }}" class="btn-e">Detail</a>
+              <a href="{{ route('guru.quiz.edit', $p) }}" class="btn-e">Edit</a>
+              <form method="POST" action="{{ route('guru.quiz.destroy', $p) }}" onsubmit="return confirm('Hapus paket {{ $p->nama }}?')">
                 @csrf @method('DELETE')
-                <button class="btn-d">🗑️</button>
+                <button class="btn-d">Hapus</button>
               </form>
             </div>
           </td>
@@ -61,12 +61,13 @@ tbody td{padding:.85rem 1rem;font-size:.86rem;font-weight:700;}
       @empty
         <tr>
           <td colspan="6" style="text-align:center;padding:2.5rem;color:#94a3b8;font-weight:700;">
-            📦 Belum ada paket soal. Buat paket pertamamu!
+            Belum ada paket soal. Buat paket pertamamu!
           </td>
         </tr>
       @endforelse
     </tbody>
   </table>
+  </div>
   <div style="padding:1rem;">{{ $packets->links() }}</div>
 </div>
 @endsection

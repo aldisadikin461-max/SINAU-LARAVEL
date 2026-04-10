@@ -100,7 +100,7 @@
       <h2>
         @if($rasi->mode==='kuliah') 🎓 Rasionalisasi Kuliah
         @else 💼 Rasionalisasi Karir @endif
-        — {{ $rasi->input_data['jurusan'] ?? '' }}
+        — {{ $rasi->input_data['jurusan_full'] ?? ($rasi->input_data['jurusan'] ?? '') }}
       </h2>
       <p>{{ $h['ringkasan'] ?? 'AI berhasil menganalisis profilmu.' }}</p>
       @if($rasi->mode==='kuliah' && isset($h['tingkat_peluang']))

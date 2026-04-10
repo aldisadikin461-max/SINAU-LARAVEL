@@ -10,20 +10,21 @@ class QuizPacket extends Model
 {
     protected $fillable = ['guru_id', 'nama', 'deskripsi', 'kelas', 'jurusan', 'status'];
 
-    public function guru(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'guru_id');
-    }
+    public function guru()
+{
+    return $this->belongsTo(\App\Models\User::class, 'guru_id');
+}
 
-    public function questions(): HasMany
-    {
-        return $this->hasMany(QuizQuestion::class)->orderBy('urutan');
-    }
+public function questions()
+{
+    return $this->hasMany(\App\Models\QuizQuestion::class, 'quiz_packet_id');
+}
 
-    public function attempts(): HasMany
-    {
-        return $this->hasMany(QuizAttempt::class);
-    }
+public function attempts()
+{
+    return $this->hasMany(\App\Models\QuizAttempt::class, 'quiz_packet_id');
+}
+
 
     public function totalPoin(): int
     {

@@ -53,7 +53,7 @@
 </div>
 
 {{-- ── Action Cards ── --}}
-<div class="action-grid">
+<div class="three-grid">
   <a href="{{ route('guru.ebooks.create') }}" class="action-card">
     <span class="action-icon">📤</span>
     <div>

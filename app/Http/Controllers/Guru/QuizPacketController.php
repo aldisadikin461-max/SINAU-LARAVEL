@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Imports\QuizPacketImport;
 use App\Models\QuizPacket;
 use App\Models\QuizQuestion;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class QuizPacketController extends Controller
 {
@@ -86,7 +88,49 @@ class QuizPacketController extends Controller
             ->with('success', 'Paket soal berhasil dihapus.');
     }
 
-    // ── Soal ──────────────────────────────────────────────────
+    // ── Import Excel ──────────────────────────────────────────────
+
+    // Form import
+    // Seharusnya
+public function importForm()
+{
+    $packets = QuizPacket::where('guru_id', auth()->id())
+        ->latest()
+        ->paginate(10); // ← ganti get() jadi paginate()
+
+    return view('guru.quiz.import', compact('packets'));
+}
+    // Proses import Excel
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:5120',
+        ], [
+            'file.required' => 'Pilih file Excel dulu.',
+            'file.mimes'    => 'Format harus .xlsx atau .xls',
+            'file.max'      => 'Ukuran file maksimal 5MB',
+        ]);
+
+        try {
+            $import = new QuizPacketImport();
+            Excel::import($import, $request->file('file'));
+
+            $nama  = $import->getPacketName();
+            $count = $import->getImportedSoal();
+
+            // Bersihkan session
+            session()->forget('_import_packet_id');
+
+            return redirect()->route('guru.quiz.index')
+                ->with('success', "✅ Paket \"{$nama}\" berhasil diimport dengan {$count} soal!");
+
+        } catch (\Exception $e) {
+            session()->forget('_import_packet_id');
+            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    // ── Soal ──────────────────────────────────────────────────────
 
     // Form tambah soal
     public function createQuestion(QuizPacket $quiz)

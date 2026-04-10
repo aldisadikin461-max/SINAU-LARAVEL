@@ -43,16 +43,16 @@
 </div>
 
 {{-- ── Charts ── --}}
-<div class="chart-grid">
-  <div class="chart-card">
+<div class="three-grid">
+  <div class="card chart-card">
     <h3>📈 Siswa Aktif (7 Hari)</h3>
     <div style="height:180px;"><canvas id="chartAktif"></canvas></div>
   </div>
-  <div class="chart-card">
+  <div class="card chart-card">
     <h3>📝 Soal Dijawab (7 Hari)</h3>
     <div style="height:180px;"><canvas id="chartSoal"></canvas></div>
   </div>
-  <div class="chart-card">
+  <div class="card chart-card">
     <h3>🎯 Distribusi Level Siswa</h3>
     <div style="height:180px;"><canvas id="chartLevel"></canvas></div>
   </div>

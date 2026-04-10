@@ -24,40 +24,35 @@
 <div class="page-sub">Pilih paket soal untuk dikerjakan</div>
 
 <div class="quiz-grid">
-    @forelse($quizzes as $quiz)
-        @php
-            $attempt = $quiz->attempts->where('siswa_id', auth()->id())->first();
-            $isDone = $attempt && $attempt->completed_at;
-        @endphp
-        <div class="quiz-card">
-            <div class="quiz-title">{{ $quiz->nama }}</div>
-            <div class="quiz-meta">
-                @if($quiz->kelas)<span>🏫 {{ $quiz->kelas }}</span>@endif
-                @if($quiz->jurusan)<span>📖 {{ $quiz->jurusan }}</span>@endif
-                <span>📝 {{ $quiz->questions->count() }} soal</span>
-                <span>⭐ {{ $quiz->totalPoin() }} poin</span>
-            </div>
-            @if($quiz->deskripsi)
-                <div class="quiz-desc">{{ Str::limit($quiz->deskripsi, 80) }}</div>
-            @endif
-            <div class="quiz-stats">
-                <span class="stat">🎯 {{ $quiz->questions->where('tingkat','mudah')->count() }} mudah</span>
-                <span class="stat">⚖️ {{ $quiz->questions->where('tingkat','sedang')->count() }} sedang</span>
-                <span class="stat">🔥 {{ $quiz->questions->where('tingkat','sulit')->count() }} sulit</span>
-            </div>
-            @if($isDone)
-                <div class="done-badge">✅ Telah dikerjakan</div>
-                <a href="{{ route('siswa.quiz.hasil', $attempt) }}" class="btn-start">Lihat Hasil</a>
-            @else
-                <a href="{{ route('siswa.quiz.show', $quiz) }}" class="btn-start">🚀 Kerjakan Sekarang</a>
-            @endif
+   @forelse($packets as $packet)
+    @php
+        $attempt = $packet->attempts->first();
+        $isDone  = $attempt !== null;
+    @endphp
+    <div class="quiz-card">
+        <div class="quiz-title">{{ $packet->nama }}</div>
+        <div class="quiz-meta">
+            @if($packet->kelas)<span>🏫 {{ $packet->kelas }}</span>@endif
+            @if($packet->jurusan)<span>📖 {{ $packet->jurusan }}</span>@endif
+            <span>📝 {{ $packet->questions_count }} soal</span>
+            <span>⭐ {{ $packet->totalPoin() }} poin</span>
         </div>
-    @empty
-        <div class="empty-state" style="grid-column:1/-1;">
-            <div class="empty-icon">📭</div>
-            <p style="font-weight:800;color:#94a3b8;">Belum ada paket soal tersedia.</p>
-            <p style="font-size:.8rem;">Cek kembali nanti ya.</p>
-        </div>
-    @endforelse
+        @if($packet->deskripsi)
+            <div class="quiz-desc">{{ Str::limit($packet->deskripsi, 80) }}</div>
+        @endif
+        @if($isDone)
+            <div class="done-badge">✅ Telah dikerjakan · Skor {{ $attempt->skor }}/{{ $attempt->total_poin }}</div>
+            <a href="{{ route('siswa.quiz.hasil', $attempt) }}" class="btn-start">Lihat Hasil</a>
+        @else
+            <a href="{{ route('siswa.quiz.show', $packet) }}" class="btn-start">🚀 Kerjakan Sekarang</a>
+        @endif
+    </div>
+@empty
+    <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon">📭</div>
+        <p style="font-weight:800;color:#94a3b8;">Belum ada paket soal tersedia.</p>
+        <p style="font-size:.8rem;">Cek kembali nanti ya.</p>
+    </div>
+@endforelse
 </div>
 @endsection

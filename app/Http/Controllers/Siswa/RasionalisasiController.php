@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Http;
 class RasionalisasiController extends Controller
 {
     const JURUSAN = ['AKL', 'MPLB', 'PPLG', 'PM', 'TF', 'TJKT', 'DKV'];
+    const JURUSAN_FULL = [
+        'AKL' => 'Akuntansi dan Keuangan Lembaga',
+        'MPLB' => 'Manajemen Perkantoran dan Layanan Bisnis',
+        'PPLG' => 'Pengembangan Perangkat Lunak dan GIM',
+        'PM' => 'Pemasaran',
+        'TF' => 'Teknik Furniture',
+        'TJKT' => 'Teknik Jaringan Komputer dan Telekomunikasi',
+        'DKV' => 'Desain Komunikasi Visual',
+    ];
 
     const SKILLS = [
         'Pemrograman Web', 'Desain Grafis', 'Jaringan Komputer', 'Akuntansi',
@@ -70,11 +79,14 @@ class RasionalisasiController extends Controller
         $mapelTerkuat = array_key_max($nilai);
         $rataMapel    = round(array_sum($nilai) / count($nilai), 2);
         $rataAll      = round(($rataMapel + $validated['nilai_produktif']) / 2, 2);
+        $jurusanFull = self::JURUSAN_FULL[$validated['jurusan']] ?? $validated['jurusan'];
 
         $prompt = "Kamu adalah konselor pendidikan SMK Indonesia yang berpengalaman. Berdasarkan data berikut, berikan rekomendasi jurusan kuliah dan kampus yang relevan untuk siswa SMKN 1 Purwokerto. Balas HANYA dengan JSON valid tanpa teks lain, tanpa markdown, tanpa backtick.
 
+PENTING: Utamakan LINEARITAS atau kesesuaian antara jurusan SMK saat ini dengan jurusan kuliah yang direkomendasikan. Misalnya, jika siswa dari PPLG, berikan rekomendasi utama seperti Teknik Informatika, Sistem Informasi, Rekayasa Perangkat Lunak, atau Ilmu Komputer.
+
 Data siswa:
-- Jurusan SMK: {$validated['jurusan']}
+- Jurusan SMK: {$jurusanFull} ({$validated['jurusan']})
 - Nilai B.Inggris: {$nilai['B. Inggris']}
 - Nilai B.Indonesia: {$nilai['B. Indonesia']}
 - Nilai Matematika: {$nilai['Matematika']}
@@ -87,7 +99,7 @@ Data siswa:
 - Rata-rata keseluruhan: {$rataAll}
 
 Format JSON response (wajib ikuti persis):
-{\"skor_kesiapan\":75,\"ringkasan\":\"string 2-3 kalimat\",\"tingkat_peluang\":\"Tinggi\",\"mapel_terkuat\":\"nama mapel\",\"rekomendasi_jurusan\":[{\"nama_prodi\":\"nama\",\"relevansi\":\"alasan\",\"prospek_karir\":[\"karir1\",\"karir2\",\"karir3\"],\"kampus\":[{\"nama\":\"nama kampus\",\"kota\":\"kota\",\"link\":\"https://...\",\"akreditasi\":\"A\",\"keterangan\":\"info singkat\"},{\"nama\":\"nama kampus\",\"kota\":\"kota\",\"link\":\"https://...\",\"akreditasi\":\"A\",\"keterangan\":\"info singkat\"},{\"nama\":\"nama kampus\",\"kota\":\"kota\",\"link\":\"https://...\",\"akreditasi\":\"B\",\"keterangan\":\"info singkat\"}]}],\"action_plan\":[\"langkah1\",\"langkah2\",\"langkah3\",\"langkah4\",\"langkah5\"],\"tips_utbk\":[\"tip1\",\"tip2\",\"tip3\"]}
+{\"skor_kesiapan\":75,\"ringkasan\":\"string 2-3 kalimat\",\"tingkat_peluang\":\"Tinggi\",\"mapel_terkuat\":\"nama mapel\",\"rekomendasi_jurusan\":[{\"nama_prodi\":\"nama\",\"relevansi\":\"alasan yang menekankan linearitas dengan {$jurusanFull}\",\"prospek_karir\":[\"karir1\",\"karir2\",\"karir3\"],\"kampus\":[{\"nama\":\"nama kampus\",\"kota\":\"kota\",\"link\":\"https://...\",\"akreditasi\":\"A\",\"keterangan\":\"info singkat\"},{\"nama\":\"nama kampus\",\"kota\":\"kota\",\"link\":\"https://...\",\"akreditasi\":\"A\",\"keterangan\":\"info singkat\"},{\"nama\":\"nama kampus\",\"kota\":\"kota\",\"link\":\"https://...\",\"akreditasi\":\"B\",\"keterangan\":\"info singkat\"}]}],\"action_plan\":[\"langkah1\",\"langkah2\",\"langkah3\",\"langkah4\",\"langkah5\"],\"tips_utbk\":[\"tip1\",\"tip2\",\"tip3\"]}
 
 Berikan tepat 5 rekomendasi jurusan. Pastikan link kampus adalah URL nyata dan valid.";
 
@@ -101,6 +113,7 @@ Berikan tepat 5 rekomendasi jurusan. Pastikan link kampus adalah URL nyata dan v
             'user_id'        => auth()->id(),
             'mode'           => 'kuliah',
             'input_data'     => array_merge($validated, [
+                'jurusan_full' => $jurusanFull,
                 'nilai_list'   => $nilai,
                 'mapel_terkuat'=> $mapelTerkuat,
                 'rata_rata'    => $rataAll,
@@ -123,19 +136,22 @@ Berikan tepat 5 rekomendasi jurusan. Pastikan link kampus adalah URL nyata dan v
             'minat'   => 'required|in:Industri,Startup,Pemerintah,Wirausaha,Freelance',
         ]);
 
+        $jurusanFull = self::JURUSAN_FULL[$validated['jurusan']] ?? $validated['jurusan'];
         $skillsStr = implode(', ', $validated['skills']);
 
-        $prompt = "Kamu adalah konselor karir SMK Indonesia yang berpengalaman. Berikan rekomendasi karir dan perusahaan untuk lulusan SMK. Balas HANYA dengan JSON valid tanpa teks lain, tanpa markdown, tanpa backtick.
+        $prompt = "Kamu adalah konselor karir SMK Indonesia yang berpengalaman. Berikan rekomendasi karir dan perusahaan untuk lulusan SMK yang kompetitif. Balas HANYA dengan JSON valid tanpa teks lain, tanpa markdown, tanpa backtick.
+
+PENTING: Berikan estimasi gaji yang realistis namun KOMPETITIF dan LAYAK untuk posisi tersebut di perusahaan modern/top, jangan memberikan angka yang terlalu rendah. Gunakan standar gaji industri saat ini (misal untuk bidang IT/Tech bisa mulai dari Rp 6-12 juta, bidang lain sesuaikan secara profesional).
 
 Data siswa:
-- Jurusan SMK: {$validated['jurusan']}
+- Jurusan SMK: {$jurusanFull} ({$validated['jurusan']})
 - Skill yang dikuasai: {$skillsStr}
 - Minat kerja: {$validated['minat']}
 
 Format JSON response (wajib ikuti persis):
-{\"skor_kesiapan\":70,\"ringkasan\":\"string 2-3 kalimat\",\"rekomendasi_karir\":[{\"posisi\":\"nama jabatan\",\"deskripsi\":\"deskripsi singkat\",\"gaji_entry\":\"Rp 4-6 juta/bulan\",\"persyaratan\":[\"req1\",\"req2\",\"req3\"],\"perusahaan\":[{\"nama\":\"nama perusahaan\",\"kota\":\"kota\",\"link\":\"https://...\",\"cara_melamar\":\"cara\"},{\"nama\":\"nama perusahaan\",\"kota\":\"kota\",\"link\":\"https://...\",\"cara_melamar\":\"cara\"},{\"nama\":\"nama perusahaan\",\"kota\":\"kota\",\"link\":\"https://...\",\"cara_melamar\":\"cara\"}]}],\"road_map\":[{\"periode\":\"0-6 bulan\",\"fokus\":\"fokus utama\",\"kegiatan\":[\"kegiatan1\",\"kegiatan2\"]},{\"periode\":\"6-12 bulan\",\"fokus\":\"fokus utama\",\"kegiatan\":[\"kegiatan1\",\"kegiatan2\"]},{\"periode\":\"1-3 tahun\",\"fokus\":\"fokus utama\",\"kegiatan\":[\"kegiatan1\",\"kegiatan2\"]}],\"action_plan\":[\"langkah1\",\"langkah2\",\"langkah3\",\"langkah4\",\"langkah5\"],\"sertifikasi_rekomendasi\":[\"sertif1\",\"sertif2\",\"sertif3\"]}
+{\"skor_kesiapan\":70,\"ringkasan\":\"string 2-3 kalimat\",\"rekomendasi_karir\":[{\"posisi\":\"nama jabatan\",\"deskripsi\":\"deskripsi singkat\",\"gaji_entry\":\"Rp 6-9 juta/bulan\",\"persyaratan\":[\"req1\",\"req2\",\"req3\"],\"perusahaan\":[{\"nama\":\"nama perusahaan\",\"kota\":\"kota\",\"link\":\"https://...\",\"cara_melamar\":\"cara\"},{\"nama\":\"nama perusahaan\",\"kota\":\"kota\",\"link\":\"https://...\",\"cara_melamar\":\"cara\"},{\"nama\":\"nama perusahaan\",\"kota\":\"kota\",\"link\":\"https://...\",\"cara_melamar\":\"cara\"}]}],\"road_map\":[{\"periode\":\"0-6 bulan\",\"fokus\":\"fokus utama\",\"kegiatan\":[\"kegiatan1\",\"kegiatan2\"]},{\"periode\":\"6-12 bulan\",\"fokus\":\"fokus utama\",\"kegiatan\":[\"kegiatan1\",\"kegiatan2\"]},{\"periode\":\"1-3 tahun\",\"fokus\":\"fokus utama\",\"kegiatan\":[\"kegiatan1\",\"kegiatan2\"]}],\"action_plan\":[\"langkah1\",\"langkah2\",\"langkah3\",\"langkah4\",\"langkah5\"],\"sertifikasi_rekomendasi\":[\"sertif1\",\"sertif2\",\"sertif3\"]}
 
-Berikan tepat 5 rekomendasi karir yang relevan.";
+Berikan tepat 5 rekomendasi karir yang sangat relevan dan memiliki prospek gaji yang baik.";
 
         $hasilAi = $this->panggilGroq($prompt);
 
@@ -146,7 +162,9 @@ Berikan tepat 5 rekomendasi karir yang relevan.";
         $rasi = Rasionalisasi::create([
             'user_id'       => auth()->id(),
             'mode'          => 'kerja',
-            'input_data'    => $validated,
+            'input_data'    => array_merge($validated, [
+                'jurusan_full' => $jurusanFull,
+            ]),
             'hasil_ai'      => $hasilAi,
             'skor_kesiapan' => $hasilAi['skor_kesiapan'] ?? null,
             'status'        => 'selesai',

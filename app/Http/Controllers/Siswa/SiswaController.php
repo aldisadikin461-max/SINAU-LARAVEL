@@ -2,24 +2,29 @@
 
 namespace App\Http\Controllers\Siswa;
 
-use App\Http\Controllers\Controller;
 use App\Events\SoalDijawab;
+use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Ebook;
+use App\Models\Forum;
 use App\Models\Question;
 use App\Models\Scholarship;
 use App\Models\Streak;
 use App\Models\StudyPlan;
 use App\Models\UserAnswer;
+use App\Services\StreakService;
 use Illuminate\Http\Request;
 
 class SiswaController extends Controller
 {
+    public function __construct(protected StreakService $streakService) {}
+
     // ── Dashboard ─────────────────────────────────────────────────
     public function dashboard(Request $request)
     {
         $user       = auth()->user();
-        $streak     = $user->streak;
+        $streakData = $this->streakService->getStreakData($user->id);
+        $streak     = Streak::where('user_id', $user->id)->first();
         $categories = Category::all();
 
         $ebooks = Ebook::with('category')
@@ -32,8 +37,22 @@ class SiswaController extends Controller
         $badges        = $user->userBadges()->with('badge')->latest()->get();
         $notifications = $user->notifications()->where('is_read', false)->latest()->take(5)->get();
 
+        // Paket soal yang tersedia untuk siswa
+        $paketSoal = \App\Models\QuizPacket::where('status', 'published')
+            ->where(function ($q) use ($user) {
+                $q->whereNull('kelas')->orWhere('kelas', $user->kelas);
+            })
+            ->where(function ($q) use ($user) {
+                $q->whereNull('jurusan')->orWhere('jurusan', $user->jurusan);
+            })
+            ->withCount('questions')
+            ->latest()
+            ->take(3)
+            ->get();
+
         return view('siswa.dashboard', compact(
-            'user', 'streak', 'ebooks', 'categories', 'badges', 'notifications'
+            'user', 'streak', 'streakData', 'ebooks', 'categories',
+            'badges', 'notifications', 'paketSoal'
         ));
     }
 
@@ -42,16 +61,42 @@ class SiswaController extends Controller
     {
         $user       = auth()->user();
         $categories = Category::all();
+        $streakData = $this->streakService->getStreakData($user->id);
 
-        $soal = Question::with('category')
-            ->when($request->category_id, fn($q) => $q->where('category_id', $request->category_id))
-            ->when($request->tingkat, fn($q) => $q->where('tingkat_kesulitan', $request->tingkat))
-            ->inRandomOrder()
+        // Soal deterministik berdasarkan hari
+        $query = Question::with('category');
+
+        if ($request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
+        if ($request->tingkat) {
+            $query->where('tingkat_kesulitan', $request->tingkat);
+        }
+
+        $totalSoal = $query->count();
+
+        if ($totalSoal === 0) {
+            return view('siswa.latihan', compact('categories', 'streakData'))
+                ->with('soal', null)
+                ->with('jawabanHariIni', null);
+        }
+
+        $hariKe = (int) floor(now()->timestamp / 86400);
+        $index  = $hariKe % $totalSoal;
+        $soal   = $query->skip($index)->first();
+
+        // Cek sudah jawab hari ini
+        $jawabanHariIni = UserAnswer::where('user_id', $user->id)
+            ->where('question_id', $soal->id)
+            ->whereDate('answered_at', today())
             ->first();
 
-        return view('siswa.latihan', compact('soal', 'categories'));
+        return view('siswa.latihan', compact(
+            'soal', 'categories', 'streakData', 'jawabanHariIni'
+        ));
     }
 
+    // ── Jawab Soal ────────────────────────────────────────────────
     public function jawabSoal(Request $request)
     {
         $request->validate([
@@ -59,7 +104,18 @@ class SiswaController extends Controller
             'jawaban'     => 'required|in:a,b,c,d',
         ]);
 
-        $user     = auth()->user();
+        $user = auth()->user();
+
+        // Cek sudah jawab hari ini
+        $sudahJawab = UserAnswer::where('user_id', $user->id)
+            ->where('question_id', $request->question_id)
+            ->whereDate('answered_at', today())
+            ->first();
+
+        if ($sudahJawab) {
+            return response()->json(['error' => 'Kamu sudah menjawab soal ini hari ini.'], 422);
+        }
+
         $question = Question::findOrFail($request->question_id);
         $benar    = $request->jawaban === $question->jawaban_benar;
 
@@ -71,23 +127,58 @@ class SiswaController extends Controller
             'answered_at' => now(),
         ]);
 
-        // Trigger events (streak, poin, badge, quest)
-        SoalDijawab::dispatch($user, $answer);
+        // Activate streak jika diminta lewat session
+        if (session('activate_streak')) {
+            $this->streakService->activate($user->id);
+            session()->forget('activate_streak');
+        }
+
+        // Catat aktivitas streak
+        $streakResult = $this->streakService->recordActivity($user->id);
+
+        // Dispatch event (untuk poin, badge, quest, notif)
+        try {
+            SoalDijawab::dispatch($user, $answer);
+        } catch (\Exception $e) {
+            \Log::warning('SoalDijawab event error: ' . $e->getMessage());
+        }
 
         return response()->json([
-            'benar'         => $benar,
-            'jawaban_benar' => $question->jawaban_benar,
-            'streak'        => $user->fresh()->streak?->streak_count ?? 0,
+            'benar'            => $benar,
+            'jawaban_benar'    => $question->jawaban_benar,
+            'streak'           => $streakResult['current'],
+            'streak_increased' => $streakResult['increased'],
+            'streak_active'    => $streakResult['is_active'],
+            'was_reset'        => $streakResult['was_reset'],
         ]);
+    }
+
+    // ── Activate Streak ───────────────────────────────────────────
+    public function activateStreak()
+    {
+        session(['activate_streak' => true]);
+        return redirect()->route('siswa.latihan');
+    }
+
+    // ── Recover Streak ────────────────────────────────────────────
+    public function recoverStreak()
+    {
+        $result = $this->streakService->recoverStreak(auth()->id());
+
+        if ($result['success']) {
+            return redirect()->back()->with('success', $result['message']);
+        }
+
+        return redirect()->back()->with('error', $result['message']);
     }
 
     // ── Leaderboard ───────────────────────────────────────────────
     public function leaderboard(Request $request)
     {
-        $user  = auth()->user();
-        $tab   = $request->tab ?? 'sekolah';
+        $user = auth()->user();
+        $tab  = $request->tab ?? 'sekolah';
 
-        $query = Streak::with('user')->orderByDesc('streak_count');
+        $query = Streak::with('user')->orderByDesc('current_streak');
 
         if ($tab === 'jurusan') {
             $query->whereHas('user', fn($q) => $q->where('jurusan', $user->jurusan));
@@ -175,7 +266,7 @@ class SiswaController extends Controller
     {
         $categories = Category::all();
 
-        $threads = \App\Models\Forum::with(['user', 'category', 'replies'])
+        $threads = Forum::with(['user', 'category', 'replies'])
             ->when($request->category_id, fn($q) => $q->where('category_id', $request->category_id))
             ->latest()
             ->paginate(10)
@@ -192,12 +283,12 @@ class SiswaController extends Controller
             'isi'         => 'required|string',
         ]);
 
-        \App\Models\Forum::create(array_merge($validated, ['user_id' => auth()->id()]));
+        Forum::create(array_merge($validated, ['user_id' => auth()->id()]));
 
         return redirect()->route('siswa.forum')->with('success', 'Thread berhasil dibuat!');
     }
 
-    public function storeReply(Request $request, \App\Models\Forum $forum)
+    public function storeReply(Request $request, Forum $forum)
     {
         $request->validate(['isi' => 'required|string']);
 
@@ -226,7 +317,7 @@ class SiswaController extends Controller
         return view('siswa.pomodoro');
     }
 
-    // ── Notifikasi mark read ──────────────────────────────────────
+    // ── Notifikasi ────────────────────────────────────────────────
     public function markNotifRead(Request $request)
     {
         auth()->user()->notifications()->update(['is_read' => true]);
