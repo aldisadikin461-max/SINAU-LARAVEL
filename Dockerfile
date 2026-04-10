@@ -1,4 +1,4 @@
-FROM php:8.2-cli
+FROM php:8.3-cli
 
 RUN apt-get update && apt-get install -y \
     libpng-dev \
@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql
+    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql zip
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
